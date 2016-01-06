@@ -1,0 +1,28 @@
+
+[package]
+name = "imgui-rs"
+version = "1.47.0"
+authors = ["Rod Furlan, Lucidscape <rod@lucidscape.com>"]
+build = "src/build.rs"
+license = "MIT"
+repository = "https://github.com/lucidscape/imgui-rs"
+description = """
+IMGUI-RS provides Rust bindings for IMGUI, a bloat-free intermediate mode GUI library for C/C++.
+
+IMGUI outputs vertex buffers that you can render in your 3D-pipeline enabled application. It is fast, portable, renderer agnostic and self-contained.
+
+IMGUI does away with state synchronization by requiring the application to explicitly pass all state required in real-time. The user interface only retains the minimal amount of state required to facilitate the functionality required by each type of widget supported by the system.
+"""
+
+[lib]
+name = "imgui_rs"
+path = "src/lib.rs"
+
+[dependencies]
+libc = "0.2.2"
+
+[dev-dependencies]
+sdl2 = "0.12"
+
+[build-dependencies]
+gcc = "0.3.20"
