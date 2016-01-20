@@ -181,8 +181,8 @@ impl UI {
         }
     }
 
-    pub fn handle_event(&mut self, event:Event) -> bool {
-        match event {
+    pub fn handle_event(&mut self, event:&Event) -> bool {
+        match event.clone() {
             Event::MouseWheel { y, .. } => {
                 if y > 0 {
                     self.state_wheel = 1;
@@ -235,23 +235,31 @@ impl UI {
         }
     }
 
-    pub fn render(&mut self, w:f32, h:f32, mouse_x:f32, mouse_y:f32, dt:f32) {
+    pub fn begin_frame(&mut self, w:u32, h:u32, mouse_x:i32, mouse_y:i32, dt:f32) {
         unsafe {
-        	(*self.io).DisplaySize = ImVec2 { x: w, y: h };
-        	(*self.io).DisplayFramebufferScale = ImVec2 { x: 1.0, y: 1.0 };
             (*self.io).DeltaTime = dt;
-            (*self.io).MousePos = ImVec2 { x: mouse_x, y: mouse_y };
+        	(*self.io).DisplaySize = ImVec2 { x: w as f32, y: h as f32};
+        	(*self.io).DisplayFramebufferScale = ImVec2 { x: 1.0, y: 1.0 };
+            (*self.io).MousePos = ImVec2 { x: mouse_x as f32, y: mouse_y as f32};
             (*self.io).MouseDown[0] = self.state_mouse[0] as u8;
             (*self.io).MouseDown[1] = self.state_mouse[1] as u8;
             (*self.io).MouseDown[2] = self.state_mouse[2] as u8;
             (*self.io).MouseWheel = self.state_wheel as f32;
+            self.state_mouse[0] = 0;
+            self.state_mouse[1] = 0;
+            self.state_mouse[2] = 0;
             self.state_wheel = 0;
             igNewFrame();
-            igShowTestWindow(&mut 1);
+        }
+    }
+
+    pub fn end_frame(&mut self) {
+        unsafe {
             igRender();
             self.render_list(igGetDrawData());
         }
     }
+
 
     pub fn render_list(&self, draw_data:*mut ImDrawData) {
         unsafe {
