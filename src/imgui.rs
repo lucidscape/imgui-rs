@@ -293,7 +293,7 @@ pub struct ImGuiIO {
     pub DisplayVisibleMin: ImVec2,
     pub DisplayVisibleMax: ImVec2,
     pub RenderDrawListsFn: Option<unsafe extern "C" fn(data: *mut ImDrawData) -> ()>,
-    pub GetClipboardTextFn: Option<extern "C" fn() -> *const c_char>,
+    pub GetClipboardTextFn: Option<unsafe extern "C" fn() -> *const c_char>,
     pub SetClipboardTextFn: Option<unsafe extern "C" fn(text: *const c_char) -> ()>,
     pub MemAllocFn: Option<extern "C" fn(sz: size_t) -> *mut c_void>,
     pub MemFreeFn: Option<unsafe extern "C" fn(ptr: *mut c_void) -> ()>,
