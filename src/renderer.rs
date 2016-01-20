@@ -1,15 +1,9 @@
-
-
 use std::ptr;
 use std::os::raw;
 use std::mem::{size_of, transmute};
 use std::ffi::CString;
 use libc::{c_void, c_int, c_uchar};
 use gl;
-use sdl2_sys::clipboard::{SDL_SetClipboardText, SDL_GetClipboardText};
-use sdl2::video::Window;
-use sdl2::event::Event;
-use sdl2::mouse::Mouse;
 use imgui::*;
 
 static VERTEX_SHADER: &'static str = "
@@ -42,7 +36,7 @@ static FRAGMENT_SHADER: &'static str = "
 
 #[derive(Debug)]
 pub struct UI {
-    io:*mut ImGuiIO,
+    pub io:*mut ImGuiIO,
     program_handle: u32,
     vertex_shader_handle: u32,
     fragment_shader_handle: u32,
@@ -54,9 +48,7 @@ pub struct UI {
     idx_projection: u32,
     idx_position: u32,
     idx_uv: u32,
-    idx_color: u32,
-    state_wheel: i8,
-    state_mouse: [i8; 3],
+    idx_color: u32
 }
 
 fn glstr(input:&str) -> *const i8 {
@@ -136,31 +128,6 @@ impl UI {
             // Disable automatic rendering, instead call ImGui::GetDrawData() to acquire draw lists
             (*io).RenderDrawListsFn = None;
 
-            // Clipboard support
-            // (*io).SetClipboardTextFn = Some(SDL_SetClipboardText);
-            (*io).GetClipboardTextFn = Some(SDL_GetClipboardText);
-
-            // Set keyboard mapping
-            (*io).KeyMap[ImGuiKey_Tab as usize] = 0;
-            (*io).KeyMap[ImGuiKey_LeftArrow as usize] = 1;
-            (*io).KeyMap[ImGuiKey_RightArrow as usize] = 2;
-            (*io).KeyMap[ImGuiKey_UpArrow as usize] = 3;
-            (*io).KeyMap[ImGuiKey_DownArrow as usize] = 4;
-            (*io).KeyMap[ImGuiKey_PageUp as usize] = 5;
-            (*io).KeyMap[ImGuiKey_PageDown as usize] = 6;
-            (*io).KeyMap[ImGuiKey_Home as usize] = 7;
-            (*io).KeyMap[ImGuiKey_End as usize] = 8;
-            (*io).KeyMap[ImGuiKey_Delete as usize] = 9;
-            (*io).KeyMap[ImGuiKey_Backspace as usize] = 10;
-            (*io).KeyMap[ImGuiKey_Enter as usize] = 11;
-            (*io).KeyMap[ImGuiKey_Escape as usize] = 12;
-            (*io).KeyMap[ImGuiKey_A as usize] = 13;
-            (*io).KeyMap[ImGuiKey_C as usize] = 14;
-            (*io).KeyMap[ImGuiKey_V as usize] = 15;
-            (*io).KeyMap[ImGuiKey_X as usize] = 16;
-            (*io).KeyMap[ImGuiKey_Y as usize] = 17;
-            (*io).KeyMap[ImGuiKey_Z as usize] = 18;
-
             UI {
                 io: io,
                 program_handle: program_handle,
@@ -174,64 +141,8 @@ impl UI {
                 idx_projection: idx_projection as u32,
                 idx_position: idx_position as u32,
                 idx_uv: idx_uv as u32,
-                idx_color: idx_color as u32,
-                state_mouse: [0, 0, 0],
-                state_wheel: 0
+                idx_color: idx_color as u32
             }
-        }
-    }
-
-    pub fn handle_event(&mut self, event:&Event) -> bool {
-        match event.clone() {
-            Event::MouseWheel { y, .. } => {
-                if y > 0 {
-                    self.state_wheel = 1;
-                } else if y < 0 {
-                    self.state_wheel = -1;
-                };
-                true
-            }
-
-            Event::MouseButtonDown { mouse_btn, .. } => {
-                match mouse_btn {
-                    Mouse::Left => {
-                        self.state_mouse[0] = 1;
-                        true
-                    }
-                    Mouse::Middle => {
-                        self.state_mouse[1] = 1;
-                        true
-                    }
-                    Mouse::Right => {
-                        self.state_mouse[2] = 1;
-                        true
-                    }
-                    _ => false
-                }
-            }
-
-            Event::TextInput { text, .. } => {
-                unsafe {
-                    ImGuiIO_AddInputCharactersUTF8(text.as_ptr() as *const i8);
-                }
-                true
-            }
-
-            Event::KeyDown { keycode: Some(keycode), .. }  => {
-                unsafe {
-                    (*self.io).KeyMap[keycode as usize] = 1;
-                }
-                true
-            }
-
-            Event::KeyUp { keycode: Some(keycode), .. }  => {
-                unsafe {
-                    (*self.io).KeyMap[keycode as usize] = 0;
-                }
-                true
-            }
-
-            _ => false
         }
     }
 
@@ -241,27 +152,11 @@ impl UI {
         	(*self.io).DisplaySize = ImVec2 { x: w as f32, y: h as f32};
         	(*self.io).DisplayFramebufferScale = ImVec2 { x: 1.0, y: 1.0 };
             (*self.io).MousePos = ImVec2 { x: mouse_x as f32, y: mouse_y as f32};
-            (*self.io).MouseDown[0] = self.state_mouse[0] as u8;
-            (*self.io).MouseDown[1] = self.state_mouse[1] as u8;
-            (*self.io).MouseDown[2] = self.state_mouse[2] as u8;
-            (*self.io).MouseWheel = self.state_wheel as f32;
-            self.state_mouse[0] = 0;
-            self.state_mouse[1] = 0;
-            self.state_mouse[2] = 0;
-            self.state_wheel = 0;
             igNewFrame();
         }
     }
 
     pub fn end_frame(&mut self) {
-        unsafe {
-            igRender();
-            self.render_list(igGetDrawData());
-        }
-    }
-
-
-    pub fn render_list(&self, draw_data:*mut ImDrawData) {
         unsafe {
             // Backup GL state
             let mut last_program = 0;
@@ -302,17 +197,21 @@ impl UI {
             let (w, h) = ((*self.io).DisplaySize.x, (*self.io).DisplaySize.y);
             gl::Viewport(0, 0, w as i32, h as i32);
             let ortho_projection = [
-        		2.0/w, 0.0, 0.0, 0.0,
-        		0.0, 2.0/-h, 0.0, 0.0,
-        		0.0, 0.0, -1.0, 0.0,
-        		-1.0, 1.0, 0.0, 1.0,
-        	];
+                2.0/w, 0.0, 0.0, 0.0,
+                0.0, 2.0/-h, 0.0, 0.0,
+                0.0, 0.0, -1.0, 0.0,
+                -1.0, 1.0, 0.0, 1.0,
+            ];
             gl::UseProgram(self.program_handle);
             gl::Uniform1i(self.idx_tex as i32, 0);
             gl::UniformMatrix4fv(self.idx_projection as i32, 1, gl::FALSE, &ortho_projection[0]);
             gl::BindVertexArray(self.vao_handle);
 
-            // Handle command lists
+            // Generate render commands
+            igRender();
+
+            // Execute render commands
+            let draw_data = igGetDrawData();
             for i in 0..(*draw_data).CmdListsCount {
                 let cmd_list = (*draw_data).CmdLists.offset(i as isize);
                 gl::BindBuffer(gl::ARRAY_BUFFER, self.vbo_handle);
@@ -360,6 +259,7 @@ impl UI {
             if last_enable_depth_test == 1 { gl::Enable(gl::DEPTH_TEST); } else { gl::Disable(gl::DEPTH_TEST) };
             if last_enable_scissor_test == 1 { gl::Enable(gl::SCISSOR_TEST); } else { gl::Disable(gl::SCISSOR_TEST) };
             gl::Viewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
+
         }
     }
 }

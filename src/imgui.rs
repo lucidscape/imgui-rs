@@ -1068,9 +1068,4 @@ extern "C" {
     pub fn ImDrawList_PrimWriteIdx(list: *mut ImDrawList, idx: ImDrawIdx) -> ();
     pub fn ImDrawList_UpdateClipRect(list: *mut ImDrawList) -> ();
     pub fn ImDrawList_UpdateTextureID(list: *mut ImDrawList) -> ();
-
-    pub fn gl3wInit() -> ();
-    pub fn ImGui_ImplSdlGL3_Init(window: *mut c_void) -> bool;
-    pub fn ImGui_ImplSdlGL3_Shutdown();
-    pub fn ImGui_ImplSdlGL3_NewFrame();
 }
