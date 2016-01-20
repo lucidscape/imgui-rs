@@ -35,7 +35,7 @@ static FRAGMENT_SHADER: &'static str = "
 ";
 
 #[derive(Debug)]
-pub struct UI {
+pub struct Renderer {
     pub io:*mut ImGuiIO,
     program_handle: u32,
     vertex_shader_handle: u32,
@@ -55,8 +55,8 @@ fn glstr(input:&str) -> *const i8 {
     CString::new(input.as_bytes()).unwrap().as_ptr() as *const i8
 }
 
-impl UI {
-    pub fn new() -> UI {
+impl Renderer {
+    pub fn new() -> Renderer {
         unsafe {
             // Backup GL state
             let (mut last_texture, mut last_array_buffer, mut last_vertex_array) = (0, 0, 0);
@@ -128,7 +128,7 @@ impl UI {
             // Disable automatic rendering, instead call ImGui::GetDrawData() to acquire draw lists
             (*io).RenderDrawListsFn = None;
 
-            UI {
+            Renderer {
                 io: io,
                 program_handle: program_handle,
                 vertex_shader_handle: vertex_shader_handle,

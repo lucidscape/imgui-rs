@@ -9,7 +9,7 @@ use sdl2::event::Event;
 use sdl2::mouse::Mouse;
 use sdl2::keyboard::Keycode;
 use imgui_rs::imgui::*;
-use imgui_rs::renderer::UI;
+use imgui_rs::renderer::Renderer;
 
 pub fn main() {
     let mut state_mouse = [0u8, 0u8, 0u8];
@@ -36,7 +36,7 @@ pub fn main() {
     renderer.present();
 
     // Initialize imgui renderer
-    let mut ui = UI::new();
+    let mut ui = Renderer::new();
 
     // Set keyboard mapping, ImGui will use those indices to peek into the io.KeyDown[] array.
     unsafe {
