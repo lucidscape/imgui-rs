@@ -136,7 +136,7 @@ pub fn main() {
             // Update ImGui
             let (w, h) = renderer.window().expect("window").size();
             let (_, x, y) = sdl_context.mouse().mouse_state();
-            ui.begin_frame(w, h, x, y, 1.0 / 60.0);
+            ui.begin_frame(w as f32, h as f32, x as f32, y as f32, 1.0 / 60.0);
 
             // Assemble a test window containing several test widgets
             igShowTestWindow(&mut 1);

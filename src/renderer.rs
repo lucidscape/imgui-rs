@@ -146,12 +146,12 @@ impl UI {
         }
     }
 
-    pub fn begin_frame(&mut self, w:u32, h:u32, mouse_x:i32, mouse_y:i32, dt:f32) {
+    pub fn begin_frame(&mut self, w:f32, h:f32, mouse_x:f32, mouse_y:f32, dt:f32) {
         unsafe {
             (*self.io).DeltaTime = dt;
-        	(*self.io).DisplaySize = ImVec2 { x: w as f32, y: h as f32};
+        	(*self.io).DisplaySize = ImVec2 { x: w, y: h };
         	(*self.io).DisplayFramebufferScale = ImVec2 { x: 1.0, y: 1.0 };
-            (*self.io).MousePos = ImVec2 { x: mouse_x as f32, y: mouse_y as f32};
+            (*self.io).MousePos = ImVec2 { x: mouse_x, y: mouse_y };
             igNewFrame();
         }
     }
