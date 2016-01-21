@@ -51,7 +51,7 @@ pub struct Renderer {
     idx_color: u32
 }
 
-fn glstr(input:&str) -> *const i8 {
+fn cstr(input:&str) -> *const i8 {
     CString::new(input.as_bytes()).unwrap().as_ptr() as *const i8
 }
 
@@ -68,18 +68,18 @@ impl Renderer {
             let program_handle = gl::CreateProgram();
             let vertex_shader_handle = gl::CreateShader(gl::VERTEX_SHADER);
             let fragment_shader_handle = gl::CreateShader(gl::FRAGMENT_SHADER);
-            gl::ShaderSource(vertex_shader_handle, 1, &CString::new(VERTEX_SHADER.as_bytes()).unwrap().as_ptr(), ptr::null());
-            gl::ShaderSource(fragment_shader_handle, 1, &CString::new(FRAGMENT_SHADER.as_bytes()).unwrap().as_ptr(), ptr::null());
+            gl::ShaderSource(vertex_shader_handle, 1, &cstr(VERTEX_SHADER), ptr::null());
+            gl::ShaderSource(fragment_shader_handle, 1, &cstr(FRAGMENT_SHADER), ptr::null());
             gl::CompileShader(vertex_shader_handle);
             gl::CompileShader(fragment_shader_handle);
             gl::AttachShader(program_handle, vertex_shader_handle);
             gl::AttachShader(program_handle, fragment_shader_handle);
             gl::LinkProgram(program_handle);
-            let idx_tex = gl::GetUniformLocation(program_handle, glstr("Texture"));
-        	let idx_projection = gl::GetUniformLocation(program_handle, glstr("ProjMtx"));
-        	let idx_position = gl::GetAttribLocation(program_handle, glstr("Position"));
-        	let idx_uv = gl::GetAttribLocation(program_handle, glstr("UV"));
-        	let idx_color = gl::GetAttribLocation(program_handle, glstr("Color"));
+            let idx_tex = gl::GetUniformLocation(program_handle, cstr("Texture"));
+        	let idx_projection = gl::GetUniformLocation(program_handle, cstr("ProjMtx"));
+        	let idx_position = gl::GetAttribLocation(program_handle, cstr("Position"));
+        	let idx_uv = gl::GetAttribLocation(program_handle, cstr("UV"));
+        	let idx_color = gl::GetAttribLocation(program_handle, cstr("Color"));
 
             // Initialize draw element buffer
             let mut elements_handle = 0;

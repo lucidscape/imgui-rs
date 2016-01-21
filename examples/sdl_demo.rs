@@ -4,12 +4,17 @@ extern crate sdl2;
 extern crate imgui_rs;
 
 use std::os;
+use std::ffi::CString;
 use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::mouse::Mouse;
 use sdl2::keyboard::Keycode;
 use imgui_rs::imgui::*;
 use imgui_rs::renderer::Renderer;
+
+fn cstr(input:&str) -> *const i8 {
+    CString::new(input.as_bytes()).unwrap().as_ptr() as *const i8
+}
 
 pub fn main() {
     let mut state_mouse = [0u8, 0u8, 0u8];
@@ -90,7 +95,8 @@ pub fn main() {
 
                 Event::TextInput { text, .. } => {
                     unsafe {
-                        ImGuiIO_AddInputCharactersUTF8(text.as_ptr() as *const i8);
+                        let text = cstr(&text);
+                        ImGuiIO_AddInputCharactersUTF8(text);
                     }
                 }
 
