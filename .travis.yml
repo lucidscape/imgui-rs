@@ -1,3 +1,13 @@
 language: rust
+sudo: required
 rust:
   - nightly
+install:
+- sudo add-apt-repository ppa:team-xbmc/ppa -y
+- sudo apt-get update -q
+- sudo apt-get install libsdl2-dev
+before_install:
+  - git submodule update --init --recursive
+env:
+  global:
+  - LD_LIBRARY_PATH: "/usr/local/lib"
